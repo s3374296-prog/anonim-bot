@@ -39,12 +39,12 @@ def get_name(m):
 def get_age(m):
     text = m.text.strip()
     if not text.isdigit() or len(text) != 2:
-        bot.send_message(m.chat.id, "❗ Yoshni to'g'ri kiriting (2 xonali son, masalan: 18):")
+        bot.send_message(m.chat.id, "Yoshni togri kiriting (masalan: 18):")
         bot.register_next_step_handler(m, get_age)
         return
     age = int(text)
     if age < 13 or age > 99:
-        bot.send_message(m.chat.id, "❗ Yoshni to'g'ri kiriting (13-99 oralig'ida):")
+        bot.send_message(m.chat.id, "Yoshni togri kiriting (13-99):")
         bot.register_next_step_handler(m, get_age)
         return
     users[m.chat.id]['age'] = age
@@ -54,33 +54,25 @@ def get_age(m):
 def get_gender(m):
     text = m.text.strip()
     if text not in ["Bola 🥷", "Qiz 🧕"]:
-        bot.send_message(m.chat.id, "Iltimos, tugmalardan birini tanlang:", reply_markup=gender_kb())
+        bot.send_message(m.chat.id, "Tugmalardan birini tanlang:", reply_markup=gender_kb())
         bot.register_next_step_handler(m, get_gender)
         return
     users[m.chat.id]['gender'] = text
     uid = m.chat.id
     p = users[uid]
-    bot.send_message(
-        uid,
-        f"✅ Profil tayyor!\n\n"
-        f"👤 Ism: {p['name']}\n"
-        f"🎂 Yosh: {p['age']}\n"
-        f"{'🥷' if 'Bola' in p['gender'] else '🧕'} Jins: {p['gender']}\n\n"
-        f"Endi suhbatdosh qidirishingiz mumkin!",
-        reply_markup=main_menu()
-    )
+    bot.send_message(uid,
+        f"Profil tayyor!\n\nIsm: {p['name']}\nYosh: {p['age']}\nJins: {p['gender']}\n\nSuhbatdosh qidirishingiz mumkin!",
+        reply_markup=main_menu())
 
 @bot.message_handler(func=lambda m: m.text == "🔍 Suhbatdosh qidirish")
 def search(m):
     uid = m.chat.id
     if uid not in users or 'gender' not in users[uid]:
-        bot.send_message(uid, "Avval ro'yxatdan o'ting: /start")
+        bot.send_message(uid, "Avval royxatdan oting: /start")
         return
-
     searching[uid] = True
     my_gender = users[uid]['gender']
     opposite = "Qiz 🧕" if "Bola" in my_gender else "Bola 🥷"
-
     found = None
     for oid, p in users.items():
         if oid == uid:
@@ -90,43 +82,21 @@ def search(m):
         if p.get('gender') == opposite:
             found = oid
             break
-
     if found:
         searching[uid] = False
         searching[found] = False
-
         p_me = users[uid]
         p_them = users[found]
-
-        bot.send_message(
-            uid,
-            f"🎉 Suhbatdosh topildi!\n\n"
-            f"👤 {p_them['name']}, {p_them['age']} yosh\n"
-            f"{p_them['gender']}\n\n"
-            f"Suhbatlashishni boshlang!",
-            reply_markup=main_menu()
-        )
-        bot.send_message(
-            found,
-            f"🎉 Suhbatdosh topildi!\n\n"
-            f"👤 {p_me['name']}, {p_me['age']} yosh\n"
-            f"{p_me['gender']}\n\n"
-            f"Suhbatlashishni boshlang!",
-            reply_markup=main_menu()
-        )
+        bot.send_message(uid, f"Suhbatdosh topildi!\n\n{p_them['name']}, {p_them['age']} yosh\n{p_them['gender']}", reply_markup=main_menu())
+        bot.send_message(found, f"Suhbatdosh topildi!\n\n{p_me['name']}, {p_me['age']} yosh\n{p_me['gender']}", reply_markup=main_menu())
     else:
-        bot.send_message(
-            uid,
-            "🔍 Suhbatdosh qidirilmoqda...\n"
-            "To'xtatish uchun '🛑 Qidiruvni to'xtatish' tugmasini bosing.",
-            reply_markup=main_menu()
-        )
+        bot.send_message(uid, "Suhbatdosh qidirilmoqda...\nToxtatish uchun tugmani bosing.", reply_markup=main_menu())
 
 @bot.message_handler(func=lambda m: m.text == "🛑 Qidiruvni to'xtatish")
 def stop_search(m):
     uid = m.chat.id
     searching[uid] = False
-    bot.send_message(uid, "🛑 Qidiruv to'xtatildi.", reply_markup=main_menu())
+    bot.send_message(uid, "Qidiruv toxtatildi.", reply_markup=main_menu())
 
 @bot.message_handler(func=lambda m: True)
 def unknown(m):
