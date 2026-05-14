@@ -5,7 +5,7 @@ TOKEN = "8555000101:AAHK96VmhzJezBwceWSaXz1GinnHirb36rU"
 bot = telebot.TeleBot(TOKEN)
 
 users = {}
-searching = {}  # uid: True/False
+searching = {}
 
 def main_menu():
     kb = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -18,7 +18,6 @@ def gender_kb():
     kb.add("Bola 🥷", "Qiz 🧕")
     return kb
 
-# ───── /start ─────
 @bot.message_handler(commands=['start'])
 def start(m):
     uid = m.chat.id
@@ -27,7 +26,6 @@ def start(m):
     bot.send_message(uid, "Salom! Ismingizni kiriting:")
     bot.register_next_step_handler(m, get_name)
 
-# ───── Ro'yxatdan o'tish ─────
 def get_name(m):
     name = m.text.strip()
     if not name or name.startswith("/"):
@@ -72,7 +70,6 @@ def get_gender(m):
         reply_markup=main_menu()
     )
 
-# ───── Qidirish ─────
 @bot.message_handler(func=lambda m: m.text == "🔍 Suhbatdosh qidirish")
 def search(m):
     uid = m.chat.id
@@ -95,7 +92,6 @@ def search(m):
             break
 
     if found:
-        # Ikkalasini ham topildi deb belgilaymiz
         searching[uid] = False
         searching[found] = False
 
@@ -126,17 +122,14 @@ def search(m):
             reply_markup=main_menu()
         )
 
-# ───── Qidiruvni to'xtatish ─────
 @bot.message_handler(func=lambda m: m.text == "🛑 Qidiruvni to'xtatish")
 def stop_search(m):
     uid = m.chat.id
     searching[uid] = False
     bot.send_message(uid, "🛑 Qidiruv to'xtatildi.", reply_markup=main_menu())
 
-# ───── Boshqa xabarlar ─────
 @bot.message_handler(func=lambda m: True)
 def unknown(m):
     bot.send_message(m.chat.id, "Menyu tugmalaridan foydalaning.", reply_markup=main_menu())
 
-bot.polling(none_stop=True)
-    
+bot.infinity_polling()
